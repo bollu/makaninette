@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+use crate::Word::*;
+
 // pg 361, 362:
 // While boundary claims to be an abstract total order,
 // we also make use of the fact that on pg. 362, we can say 'boundary+1',
@@ -16,39 +19,39 @@ struct Base<C, X> {
 struct BaseId(usize); // a pointer into the vector of bases.
 
 // pg 361. Defintion 2: Generalized Equation
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct GeneralizedEquation<C, X> {
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct GeneralizedEquation<C, X : std::cmp::Eq + std::hash::Hash> {
     bases : Vec<Base<C, X>>,
-    var2base : HashMap<(X, Bool), BaseId>,
+    var2base : HashMap<(X, bool), BaseId>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum C1Violation {
+enum C1Violation<X> {
     NotEnoughDuals(X),
     TooManyDuals(X, BaseId, BaseId, BaseId),
     NotEqualBoundaryLength(X, BaseId, BaseId),
 }
 
-impl GeneralizedEquation {
+impl<C, X : std::cmp::Eq + std::hash::Hash > GeneralizedEquation<C, X > {
     // pg. 361
-    fn checkC1(&self) -> Vec<C1Violation> {
+    fn checkC1(&self) -> Vec<C1Violation<X>> {
         Vec::new()
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum C2Violation {
+enum C2Violation<C> {
     BoundaryLengthNotTwo(C, BaseId),
 }
 
-impl GeneralizedEquation<C, X> {
-    fn checkC2(&self) -> Vec<C2Violation> {
+impl<C, X : std::cmp::Eq + std::hash::Hash> GeneralizedEquation<C, X> {
+    fn checkC2(&self) -> Vec<C2Violation<C>> {
         Vec::new()
     }
 }
 
 
-impl Base {
+impl<C, X> Base<C, X> {
     // pg. 361
     fn is_constant(&self) -> bool {
         matches!(self.label, Label::Constant(_))
@@ -60,41 +63,46 @@ impl Base {
 }
 
 // pg. 362
-fn is_boundary_pair_column(i : Boundary, j : Boundary) -> bool {
+fn is_boundary_pair_column(i : &Boundary, j : &Boundary) -> bool {
     let Boundary(i) = i;
-    let Boundary(j) = b;
+    let Boundary(j) = j;
     i <= j
 }
 
 // pg. 362
-fn is_boundary_pair_indecomposable(i: Boundary, j: Boundary) -> bool {
+fn is_boundary_pair_indecomposable(i : &Boundary, j : &Boundary) -> bool {
     let Boundary(i) = i;
     let Boundary(j) = j;
-    i + 1 == j
+    *i + 1 == *j
 }
 
 // pg. 362
-fn is_bounary_pair_empty(i: Boundary, j: Boundary) -> bool {
+fn is_boundary_pair_empty(i : &Boundary, j : &Boundary) -> bool {
     let Boundary(i) = i;
     let Boundary(j) = j;
     i == j
 }
 
 // pg 362. A generalized equation is solved if all its variable bases are empty.
-impl Base <C, X> {
+impl<C, X> Base <C, X> {
     fn is_solved(&self) -> bool {
         if self.is_constant() {
             return true;
         }
-        for (b1, b2) in self.boundaries.windows(2) {
-            if !is_boundary_pair_empty(b1, b2) {
-                return false;
+        for slice in self.boundaries.windows(2) {
+            match slice {
+                [b1, b2] if is_boundary_pair_column(b1, b2) => {
+                    if !is_boundary_pair_indecomposable(b1, b2) {
+                        return false;
+                    }
+                },
+                _ => continue,
             }
         }
-
+        return true;
     }
 }
-impl GeneralizedEquation<C, X> {
+impl<C, X : std::hash::Hash + std::cmp::Eq > GeneralizedEquation<C, X> {
     fn is_solved(&self) -> bool {
         for base in &self.bases {
             if base.is_variable() && !base.boundaries.is_empty() {
