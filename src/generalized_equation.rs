@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::Word::*;
+use crate::word::*;
 
 // pg 361, 362:
 // While boundary claims to be an abstract total order,
@@ -34,7 +34,7 @@ enum C1Violation<X> {
 
 impl<C, X : std::cmp::Eq + std::hash::Hash > GeneralizedEquation<C, X > {
     // pg. 361
-    fn checkC1(&self) -> Vec<C1Violation<X>> {
+    fn check_c1(&self) -> Vec<C1Violation<X>> {
         Vec::new()
     }
 }
@@ -45,7 +45,7 @@ enum C2Violation<C> {
 }
 
 impl<C, X : std::cmp::Eq + std::hash::Hash> GeneralizedEquation<C, X> {
-    fn checkC2(&self) -> Vec<C2Violation<C>> {
+    fn check_c2(&self) -> Vec<C2Violation<C>> {
         Vec::new()
     }
 }
