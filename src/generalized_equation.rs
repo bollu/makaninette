@@ -6,27 +6,27 @@ use crate::word::*;
 // we also make use of the fact that on pg. 362, we can say 'boundary+1',
 // which implies that the most sensible way to encode it is probably as a natural number.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct Boundary(usize);
+pub struct Boundary(usize);
 
 // pg 361. Defintion 2: Generalized Equation
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct Base<C, X> {
+pub struct Base<C, X> {
     label : Label<C, X>,
     boundaries : Vec<Boundary>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct BaseId(usize); // a pointer into the vector of bases.
+pub struct BaseId(usize); // a pointer into the vector of bases.
 
 // pg 361. Defintion 2: Generalized Equation
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct GeneralizedEquation<C, X : std::cmp::Eq + std::hash::Hash> {
+pub struct GeneralizedEquation<C, X : std::cmp::Eq + std::hash::Hash> {
     bases : Vec<Base<C, X>>,
     var2base : HashMap<(X, bool), BaseId>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum C1Violation<X> {
+pub enum C1Violation<X> {
     NotEnoughDuals(X),
     TooManyDuals(X, BaseId, BaseId, BaseId),
     NotEqualBoundaryLength(X, BaseId, BaseId),
@@ -40,7 +40,7 @@ impl<C, X : std::cmp::Eq + std::hash::Hash > GeneralizedEquation<C, X > {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum C2Violation<C> {
+pub enum C2Violation<C> {
     BoundaryLengthNotTwo(C, BaseId),
 }
 
@@ -63,21 +63,21 @@ impl<C, X> Base<C, X> {
 }
 
 // pg. 362
-fn is_boundary_pair_column(i : &Boundary, j : &Boundary) -> bool {
+pub fn is_boundary_pair_column(i : &Boundary, j : &Boundary) -> bool {
     let Boundary(i) = i;
     let Boundary(j) = j;
     i <= j
 }
 
 // pg. 362
-fn is_boundary_pair_indecomposable(i : &Boundary, j : &Boundary) -> bool {
+pub fn is_boundary_pair_indecomposable(i : &Boundary, j : &Boundary) -> bool {
     let Boundary(i) = i;
     let Boundary(j) = j;
     *i + 1 == *j
 }
 
 // pg. 362
-fn is_boundary_pair_empty(i : &Boundary, j : &Boundary) -> bool {
+pub fn is_boundary_pair_empty(i : &Boundary, j : &Boundary) -> bool {
     let Boundary(i) = i;
     let Boundary(j) = j;
     i == j
